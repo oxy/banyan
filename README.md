@@ -1,10 +1,11 @@
 # banyan
 
-banyan is an experimental filesystem snapshot/layering tool.
+banyan is an experimental Linux-only filesystem snapshot/layering tool.
 
 It has an experimental multithreaded queue that directly uses `getdents64`
 instead of `readdir`, see `src/util/queue.rs`. It also tries to avoid
-copies as much as possible.
+copies as much as possible. Because it directly makes syscalls, banyan
+is not portable and will only run on modern Linux kernels.
 
 Snapshot restore is still a work-in-progress, and the bitstream is not fully
 frozen yet, so functionality is not guaranteed! Use at your own risk;
