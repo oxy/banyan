@@ -246,8 +246,12 @@ fn visit(
     ignore_errors: bool,
     same_device: bool,
 ) -> Result<FsState, io::Error> {
-    let threads = 12;
-
+    let threads = std::thread::available_parallelism()?.get();
+    let threads = if (threads > 4) {
+        threads - 2
+    } else {
+        threads
+    };
     let metadata = basepath.metadata()?;
     let dev = metadata.dev();
 
