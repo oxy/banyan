@@ -3,14 +3,20 @@ use super::{openat, PString};
 use std::ffi::CStr;
 use std::mem::MaybeUninit;
 use std::os::unix::prelude::RawFd;
-use std::os::raw::c_char;
 use std::ptr::{null, self};
 use std::sync::atomic::{AtomicIsize, AtomicUsize, AtomicPtr, Ordering};
 use std::sync::{Arc};
 use std::time::Duration;
+use std::os::raw::{c_char, c_long};
 use parking_lot::Mutex;
 
 const NODE_LEN: usize = 4096 - (3 * 64);
+
+#[cfg(all(target_os="linux", target_arch="x86_64"))]
+const GETDENTS64: c_long = 217;
+
+#[cfg(all(target_os="linux", target_arch="aarch64"))]
+const GETDENTS64: c_long = 61;
 
 #[derive(Debug)]
 pub(crate) struct NodeData {
@@ -124,7 +130,7 @@ impl<'a> NodeData {
             size: 0,
         };
         let ret: i64 =
-            unsafe { libc::syscall(217, fd, n.data.as_ptr(), NODE_LEN) };
+            unsafe { libc::syscall(GETDENTS64, fd, n.data.as_ptr(), NODE_LEN) };
         if ret < 0 {
             Err(std::io::Error::last_os_error())
         } else {
